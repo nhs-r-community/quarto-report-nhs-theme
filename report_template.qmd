@@ -1,0 +1,133 @@
+---
+title: "Report Title"
+date: "`r Sys.Date()`"
+author: Your Name
+date-format: "D MMMM YYYY"
+format:
+  html:
+    # Table of Contents options
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    toc-title: Contents
+    number-sections: false
+    number-depth: 3
+    # Render options
+    theme: cosmo
+    css: NHS_report_theme.css
+    anchor-sections: false
+    html-math-method: katex
+    # Code options
+    code-tools:
+      source: false
+      toggle: false
+      caption: none
+    # code-fold: false
+    # code-summary: "Show code"
+    embed-resources: true
+    standalone: true
+    # URL options
+    link-external-icon: true
+    link-external-newwindow: true
+    # Reference options
+    citations-hover: true
+    footnotes-hover: true
+    # Callout options
+    callout-appearance: simple
+    callout-collapse: true
+    # Caption options
+    cap-location: bottom
+    # Title options
+    title-block-banner: '#005EB8'
+    backgroundcolor: '#f0f4f5'
+    # Set font
+    mainfont: 'Open Sans'
+execute:
+  echo: false
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+---
+
+```{r load library}
+#| include: false
+
+# Add librires required here
+# -------------------------------------------------------------------------
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
+library(ggplot2)
+
+# Define any functions here
+# -------------------------------------------------------------------------
+
+
+```
+
+# H1 Title
+
+Text.
+
+<!-- start of chart tabset -->
+:::: panel-tabset
+
+<!-- make new tabs with ## -->
+## Chart Tab
+
+```{r}
+# Add your chart here
+#-------------------------------------------------------
+
+# Load the mtcars dataset
+data(mtcars)
+
+# Create a basic ggplot chart with mtcars data
+basic_ggplot <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() + # Add points to the plot
+  labs(title = "Miles per Gallon vs. Weight",
+       x = "Weight (1000 lbs)",
+       y = "Miles per Gallon") # Add labels to the plot
+
+# Display the chart
+print(basic_ggplot)
+```
+
+<!-- make new tabs with ## -->
+## Data Table Tab
+
+```{r}
+# Add your table here
+#-------------------------------------------------------
+
+# Load the mtcars dataset
+data(mtcars)
+
+# Display the first 6 rows of the dataset as a table
+mtcars_table <- head(mtcars, 10)
+
+# Print the table
+print(mtcars_table)
+```
+
+::::
+<!-- end of chart tabset -->
+
+## H2 Title
+
+### H3 Title
+
+Text.
+
+::: {.callout-note}
+## Callout section
+
+There are [five different types of callouts available](https://quarto.org/docs/authoring/callouts.html#callout-types).
+
+- note `{.callout-note}`
+- warning `{.callout-warning}`
+- important `{.callout-important}`
+- tip `{.callout-tip}`
+- caution `{.callout-caution}`
+
+:::

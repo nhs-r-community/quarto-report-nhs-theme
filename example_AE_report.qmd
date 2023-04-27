@@ -1,0 +1,357 @@
+---
+title: "A&E Attendance Report"
+date: "`r Sys.Date()`"
+author: Craig R Shenton
+date-format: "D MMMM YYYY"
+format:
+  html:
+    # Table of Contents options
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    toc-title: Contents
+    number-sections: false
+    number-depth: 3
+    # Render options
+    theme: cosmo
+    css: NHS_report_theme.css
+    anchor-sections: false
+    html-math-method: katex
+    # Code options
+    code-tools:
+      source: false
+      toggle: false
+      caption: none
+    # code-fold: false
+    # code-summary: "Show code"
+    embed-resources: true
+    standalone: true
+    # URL options
+    link-external-icon: true
+    link-external-newwindow: true
+    # References
+    citations-hover: true
+    footnotes-hover: true
+    callout-appearance: simple
+    callout-collapse: true
+    cap-location: bottom
+    title-block-banner: '#005EB8'
+    backgroundcolor: '#f0f4f5'
+    mainfont: 'Open Sans'
+execute:
+  echo: false
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+#execute: 
+#  echo: false
+---
+
+```{r load library}
+#| include: false
+
+# Load libs and global vars
+# -------------------------------------------------------------------------
+suppressPackageStartupMessages({
+  library(targets)
+  library(dplyr)
+  library(readr)
+  library(here)
+  library(DT)
+  library(scales)
+  library(lubridate)
+  library(plotly)
+})
+
+# Define functions
+# -------------------------------------------------------------------------
+
+# case_names function
+# -------------------------------------------------------------------------
+#' @title Convert Organisation Names to Capital Case and Replace Specific Abbreviations
+#'
+#' @description This function takes a data frame and a column containing organisation names, converts the names to capital case, and replaces specific abbreviations with their correct uppercased versions.
+#'
+#' @param data A data frame containing a column with organisation names.
+#' @param org_name A character vector specifying the name of the column containing organisation names.
+#'
+#' @return A data frame with the organisation names column updated to capital case and specific abbreviations replaced with their correct uppercased versions.
+#'
+case_names <- function(data, org_name) {
+  patterns <- c("And", "In", "On", "With", "Nhs", "Sicbl", "Nft", "Pt", "Nt")
+  replacements <- c("and", "in", "on", "with", "NHS", "SICBL", "NFT", "PT", "NT")
+  
+  data <- data %>%
+    dplyr::mutate(org_name = stringi::stri_trans_totitle(org_name))
+  
+  for (i in seq_along(patterns)) {
+    data$org_name <- stringr::str_replace_all(data$org_name, patterns[i], replacements[i])
+  }
+  
+  return(data)
+}
+
+
+# Define function
+# -------------------------------------------------------------------------
+remove <- c('zoom2d','pan2d', 'select2d', 'lasso2d', 'zoomIn2d',
+            'zoomOut2d', 'autoScale2d', 'resetScale2d', 'zoom',
+            'pan', 'select', 'zoomIn', 'zoomOut', 'autoScale',
+            'resetScale', 'toggleSpikelines', 'hoverClosestCartesian',
+            'hoverCompareCartesian', 'toImage')
+
+hline <- function(y = 0, color = "#333333", width = 0.5) {
+  list(
+    type = "line",
+    x0 = 0,
+    x1 = 1,
+    xref = "paper",
+    y0 = y,
+    y1 = y,
+    line = list(color = color, opacity = 0.5, width = width,  dash = "dash")
+  )
+}
+
+text_annotate <- function(x = "2019-08-01",
+                          y = 0,
+                          color = "#1AA3C6",
+                          text = "text") {
+  list(
+    x = x,
+    y = y,
+    text = text,
+    xref = "x",
+    yref = "y",
+    font = list(color = color,
+                size = 12),
+    showarrow = FALSE)
+}
+
+recap_option <- function(data, dropdown_col) {
+  names <- unique(data[dropdown_col][[1]])
+  recap_option <- list()
+  for (i in 1:length(names)) {
+    recap_option[[i]] <- list(method = "restyle",
+                 args = list("transforms[0].value", names[[i]]),
+                 label = names[i])
+  }
+  return(recap_option)
+}
+
+plotly_line_chart_minmax_dropdown <- function(data, x, y, min, max, mean,
+                              target,
+                              dropdown,
+                              plot_title,
+                              x_lab, y_lab,
+                              y_min, y_max,
+                              percent = FALSE) {
+  require(dplyr)
+  require(plotly)
+  fig <- plotly::plot_ly(data, type = "scatter", mode = "lines") %>%
+    add_trace(x = data[x][[1]],
+              y = data[min][[1]],
+              type = 'scatter',
+              mode = 'lines',
+              line = list(color = 'transparent'),
+              name = "(Min)",
+              hovertemplate = paste('%{y:.1%}')) %>%
+    add_trace(x = data[x][[1]],
+              y = data[max][[1]],
+              type = 'scatter',
+              mode = 'lines',
+              fill = 'tonexty',
+              fillcolor='rgba(174, 37, 115, 0.1)',
+              line = list(color = 'transparent'),
+              name = "(Max)",
+              hovertemplate = paste('%{y:.1%}')) %>%
+    add_trace(x = data[x][[1]],
+              y = data[mean][[1]],
+              line = list(color = 'rgba(174, 37, 115, 0.5)',
+                          width = 2,
+                          dash = 'dash'),
+              name = "(Benchmark)",
+              hovertemplate = paste('%{y:.1%}')) %>%
+    add_trace(x = data[x][[1]],
+              y = target,
+              line = list(color='#30BCAD',
+                          width = 2,
+                          dash = 'dash'),
+              name = "(Target)",
+              hovertemplate = paste('%{y:.1%}')) %>%
+    add_trace(type = "scatter",
+              mode = "lines",
+              x = data[x][[1]],
+              y = data[y][[1]],
+              name = "Performance",
+              line = list(color = 'rgb(22, 96, 167)',
+                          width = 3, dash = 'solid'),
+              transforms = list(list(type = "filter",
+                              target = data[dropdown][[1]],
+                              operation = 'in',
+                              value = unique(data[dropdown][[1]]))),
+              hovertemplate = paste('%{y:.1%}')) %>%
+    config(modeBarButtonsToRemove = remove,
+                 displaylogo = FALSE,
+                 displayModeBar = TRUE) %>%
+    layout(title = plot_title,
+           font = list(size = 14),
+           xaxis = list(title = x_lab),
+           yaxis = list(title = y_lab,
+                         range = c(y_min, y_max)),
+           showlegend = FALSE,
+           hovermode = "x unified",
+           updatemenus = list(list(
+                xanchor = "left",
+                yanchor = "top",
+                x = 0,
+                y = 1.2,
+                type = "dropdown",
+                active = 0,
+                buttons = recap_option(data = data,
+                                       dropdown_col = dropdown)
+           )),
+           margin = list(l = 20, r = 20, b = 70, t = 50, pad = 4))
+  if (percent) {
+    fig <- fig %>%
+        layout(yaxis = list(tickformat = "0%"))
+  }
+  return(fig)
+}
+
+```
+
+# A&E (Type 1) 4-Hour Performance
+
+The four-hour A&E waiting time target is a pledge set out in the [Handbook to the NHS Constitution][nhs_const]. The operational standard is that at least 95% of patients attending A&E should be admitted, transferred or discharged within four hours.
+
+:::: panel-tabset
+
+## Time-Series
+
+```{r}
+#| warning: false
+
+# Load libraries
+library(NHSRdatasets)
+library(dplyr)
+library(lubridate)
+library(scales)
+
+# Load datasets
+data(ae_attendances)
+
+# ODS codes
+ods_codes_file_url <- "https://nhsenglandfilestore.s3.amazonaws.com/ods/etrust.csv"
+ods_codes_df <- read.csv(ods_codes_file_url) %>%
+  dplyr::select(1, 2) %>%
+  dplyr::rename(org_code = 1, org_name = 2)
+
+# set Capital Case on Trust Names
+ods_codes_df <- case_names(ods_codes_df, "org_code")
+
+# Filter ae_attendances to type 1, calculate performance, and add month column
+ae_attendances_filtered <- ae_attendances %>%
+  dplyr::filter(type == 1) %>%
+  dplyr::mutate(performance = 1 - breaches/attendances,
+                month = lubridate::month(period))
+
+# Calculate min, max, and mean performance by month
+performance_stats <- ae_attendances_filtered %>%
+  dplyr::group_by(month) %>%
+  dplyr::summarise(across(performance, list(min = min,
+                                           max = max,
+                                           average = mean)))
+
+# Join performance stats and ODS codes to the filtered dataset
+ae_attendances_enhanced <- ae_attendances_filtered %>%
+  dplyr::left_join(performance_stats, by = "month") %>%
+  dplyr::left_join(ods_codes_df, by = "org_code") %>%
+  dplyr::arrange(period)
+
+# Format the final table
+ae_attendances_table <- ae_attendances_enhanced %>%
+  dplyr::mutate(across(c(breaches, attendances, admissions),
+                       ~ format(round(.), nsmall = 0, big.mark = ",")),
+                across(starts_with("performance"),
+                       ~ percent(., accuracy = 1))) %>%
+  dplyr::select(period, org_code, org_name, performance, attendances, breaches)
+
+
+```
+
+```{r}
+plotly_line_chart_minmax_dropdown(data = ae_attendances_enhanced,
+    x = "period",
+    y = "performance",
+    min = "performance_min",
+    max = "performance_max",
+    mean = "performance_average",
+    target = 0.95,
+    dropdown = "org_name",
+    plot_title = " ",
+    x_lab = "Month of attendance",
+    y_lab = "Met 4-hour standard",
+    y_min = 0, y_max = 1.09,
+    percent = TRUE) %>%
+    layout(annotations = text_annotate(x = "2016-06-01",
+                                       y = 0.99,
+                                       color = '#30BCAD',
+                                       text = "95% Target"))
+```
+
+::: {.callout-note}
+## Data source
+
+- [NHS England Statistical Work Areas][nhs_swa]
+- Available under the [Open Government Licence v3.0][ogl_v3]
+:::
+
+## Data Table
+
+```{r}
+DT::datatable(ae_attendances_table, 
+          extensions = 'Buttons',
+          rownames = FALSE,
+          options = list(dom = 'Brtip', pageLength = 10, autoWidth = TRUE,
+          buttons = c('copy', 'csv', 'pdf', 'print')
+          )) %>%
+          DT::formatStyle(columns = colnames(.$x$data), `font-size` = "14px")
+```
+
+## Metadata
+
+This report uses the `ae_attendances` dataset from the [{NHSRdatasets}](https://nhs-r-community.github.io/NHSRdatasets/) package, developed by the [NHS-R Community](https://nhsrcommunity.com/). The dataset contains all reported A&E attendances for the period April 2016 through March 2019.
+
+| Column | Description |
+|---|---|
+| `period` | The month that this activity relates to, stored as a date (1st of each month) |
+| `org_code` | The [ODS code][ods] for the organisation that this activity relates to |
+| `type` | The [Department Type][ae_types] for this activity, either 1, 2, or other |
+| `attendances` | The number of attendances for this department type at this organisation for this month |
+| `breaches` | The number of attendances that breached the 4 hour target |
+| `admissions` | The number of attendances that resulted in an admission to the hospital |
+
+### Department Types
+According to the [NHS Data Dictonary][ae_types] the type of Accident and Emergency Department is determined according to the activity performed as follows:
+
+| Type | Definition |
+|---|---|
+| `01` | Emergency departments are a Consulatant led 24 hour service with full resuscitation facilities and designated accommodation for the reception of accident and emergency Patients |
+| `02` | Consultant led mono specialty accident and emergency service (e.g. ophthalmology, dental) with designated accommodation for the reception of Patients  |
+| `03` | Other type of A&E/minor injury activity with designated accommodation for the reception of accident and emergency Patients. The department may be doctor led or NURSE led and treats at least minor injuries and illnesses and can be routinely accessed without appointment. A service mainly or entirely appointment based (for example a GP Practice or Out-Patient Clinic) is excluded even though it may treat a number of Patients with minor illness or injury. Excludes NHS walk-in centres |
+| `04` | NHS walk in centres |
+:::: 
+
+The length of time patients spend in A&E before admission, transfer or discharge depends on the type of A&E unit they visit. In the past, minor A&Es (types 2 and 3, such as single specialty departments or minor injury units) nearly always admit, transfer, or discharge in less than four hours, whereas major A&Es (type 1) deal with a higher number of attendees and more serious cases, and consistently perform worse at the four-hour target[^1].
+
+</br>
+
+[tj_email]: mailto:thomas.jemmett@nhs.net
+[su_web]:   https://www.strategyunitwm.nhs.uk/ 
+[nhs_swa]:  https://www.england.nhs.uk/statistics/statistical-work-areas/ae-waiting-times-and-activity/
+[ogl_v3]:   https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+[ods]:      https://digital.nhs.uk/services/organisation-data-service
+[ae_types]: https://web.archive.org/web/20200128111444/https://www.datadictionary.nhs.uk/data_dictionary/attributes/a/acc/accident_and_emergency_department_type_de.asp
+[nhs_const]: https://www.gov.uk/government/publications/supplements-to-the-nhs-constitution-for-england/the-handbook-to-the-nhs-constitution-for-england
+
+[^1]: [Nuffield Trust: A&E waiting times](https://www.nuffieldtrust.org.uk/resource/a-e-waiting-times)
