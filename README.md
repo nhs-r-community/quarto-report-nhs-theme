@@ -1,6 +1,6 @@
 <a alt="NHS-R Community's logo" href='https://nhsrcommunity.com/'><img src='https://nhs-r-community.github.io/assets/logo/nhsr-logo.png' align="right" height="80" /></a>
 
-# Using the NHS .html report theme with Quarto
+# Quarto Report NHS Theme
 
 ## About
 
