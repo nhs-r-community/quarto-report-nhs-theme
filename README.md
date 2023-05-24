@@ -107,4 +107,4 @@ See the [open issues](https://github.com/nhs-r-community/quarto-nhs-theme/issues
 
 ## License
 
-Distributed under a MIT License. _See [LICENSE.md](/LICENSE) for more information._
+Distributed under a MIT Licence. _See [LICENCE.md](/LICENCE) for more information._
