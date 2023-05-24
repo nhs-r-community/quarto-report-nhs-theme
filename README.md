@@ -80,7 +80,8 @@ With the YAML options updated, you can now render the Quarto report with the NHS
 - The rendered [report_template.html](/report_template.html) file will be saved in the same folder within the report directory.
 
 <a name="troubleshooting"></a>
-## 4. Troubleshooting
+
+### 4. Troubleshooting
 
 If you encounter any issues during the rendering process or with the appearance of the NHS theme in your Quarto report, consider the following:
 
@@ -89,13 +90,10 @@ If you encounter any issues during the rendering process or with the appearance 
 - Consult the Quarto documentation (https://quarto.org/docs/) for additional guidance and troubleshooting tips.
 
 <a name="example"></a>
-## 5. NHS England Example Report
+
+### 5. NHS England Example Report
+
 An example report developed by the NHS England R community has been provided that uses the quarto-nhs-report-theme: [example_AE_report](/example_AE_report.qmd). The report shows how the NHS theme can be used to develop open-source analytical reports using R and Quarto and can be previewed at [https://nhsengland.github.io/nhs-r-reporting/examples/ae_attendance.html](https://nhsengland.github.io/nhs-r-reporting/examples/ae_attendance.html)
-
-<a name="conclusion"></a>
-## 6. Conclusion
-
-By following this user guide, you should now have a Quarto report styled with the NHS theme in R-Studio. This will help you create professional, consistent reports in line with the NHS branding guidelines.
 
 ## Contributing
 
