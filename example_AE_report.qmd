@@ -50,18 +50,33 @@ crossref:
 ```{r load library}
 #| include: false
 
-# Load libs and global vars
+# Install and load Libraries
 # -------------------------------------------------------------------------
-suppressPackageStartupMessages({
-  library(targets)
-  library(dplyr)
-  library(readr)
-  library(here)
-  library(DT)
-  library(scales)
-  library(lubridate)
-  library(plotly)
-})
+install_and_load_packages <- function(packages, github_packages) {
+  for(package in packages) {
+    if (!require(package, character.only = TRUE)) {
+      install.packages(package, repos = "https://cran.r-project.org", dependencies = TRUE)
+      library(package, character.only = TRUE)
+    }
+  }
+  
+  if (!requireNamespace("remotes", quietly = TRUE)) {
+    install.packages("remotes", repos = "https://cran.r-project.org", dependencies = TRUE)
+  }
+  
+  for(github_path in github_packages) {
+    package <- strsplit(github_path, "/")[[1]][2]
+    if (!require(package, character.only = TRUE)) {
+      remotes::install_github(github_path)
+      library(package, character.only = TRUE)
+    }
+  }
+}
+
+packages <- c("dplyr", "readr", "here", "DT", "scales", "lubridate", "plotly")
+github_packages <- c("nhs-r-community/NHSRdatasets")
+
+suppressPackageStartupMessages(install_and_load_packages(packages, github_packages))
 
 # Define functions
 # -------------------------------------------------------------------------

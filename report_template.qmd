@@ -54,10 +54,31 @@ crossref:
 
 # Add librires required here
 # -------------------------------------------------------------------------
-if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  install.packages("ggplot2")
+install_and_load_packages <- function(packages, github_packages) {
+  for(package in packages) {
+    if (!require(package, character.only = TRUE)) {
+      install.packages(package, repos = "https://cran.r-project.org", dependencies = TRUE)
+      library(package, character.only = TRUE)
+    }
+  }
+  
+  if (!requireNamespace("remotes", quietly = TRUE)) {
+    install.packages("remotes", repos = "https://cran.r-project.org", dependencies = TRUE)
+  }
+  
+  for(github_path in github_packages) {
+    package <- strsplit(github_path, "/")[[1]][2]
+    if (!require(package, character.only = TRUE)) {
+      remotes::install_github(github_path)
+      library(package, character.only = TRUE)
+    }
+  }
 }
-library(ggplot2)
+
+packages <- c("ggplot2")
+github_packages <- NULL
+
+suppressPackageStartupMessages(install_and_load_packages(packages, github_packages))
 
 # Define any functions here
 # -------------------------------------------------------------------------
