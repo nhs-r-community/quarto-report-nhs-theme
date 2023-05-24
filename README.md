@@ -38,11 +38,9 @@ To follow this guide, you will need the following:
 
 In order to apply the NHS report theme to your Quarto report, you will need to update the YAML metadata at the beginning of your `.qmd` file. Follow these steps:
 
-a. Open your [Quarto report template](/report_template.qmd) in R-Studio.
-
-b. Locate the YAML metadata section at the beginning of the file, enclosed by `---` lines.
-
-c. Add the `css` option under the `html` output format, and set its value to the path of the [NHS report theme](/NHS_report_theme.css).
+- Open your [Quarto report template](/report_template.qmd) in R-Studio.
+- Locate the YAML metadata section at the beginning of the file, enclosed by `---` lines.
+- Add the `css` option under the `html` output format, and set its value to the path of the [NHS report theme](/NHS_report_theme.css).
 
 ```yaml
 ---
@@ -56,7 +54,7 @@ output:
 
 **Note** Make sure to use the correct file path. Should be relative to the root of the project folder.
 
-d. If you are makeing an [embedded report](https://quarto.org/docs/output-formats/html-publishing.html#standalone-html) to email out, add the `self_contained` option under the `html` output format, and set its value to `true`:
+- If you are makeing an [embedded report](https://quarto.org/docs/output-formats/html-publishing.html#standalone-html) to email out, add the `self_contained` option under the `html` output format, and set its value to `true`:
 
 ```yaml
 ---
@@ -77,11 +75,9 @@ There are many other options in the template YAML file that set the look and fun
 
 With the YAML options updated, you can now render the Quarto report with the NHS R report theme applied. Follow these steps:
 
-a. In R-Studio, with your [Quarto report template](/report_template.qmd) open, click on the 'Render' button located in the toolbar.
-
-b. R-Studio will render the Quarto report and display the output in a new browser window, with the NHS R report theme applied.
-
-c. The rendered [report_template.html](/report_template.html) file will be saved in the same folder within the report directory.
+- In R-Studio, with your [Quarto report template](/report_template.qmd) open, click on the 'Render' button located in the toolbar.
+- R-Studio will render the Quarto report and display the output in a new browser window, with the NHS R report theme applied.
+- The rendered [report_template.html](/report_template.html) file will be saved in the same folder within the report directory.
 
 <a name="troubleshooting"></a>
 ## 4. Troubleshooting
