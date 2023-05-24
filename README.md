@@ -19,7 +19,6 @@ Quarto is a powerful system for creating reports, presentations, and interactive
 3. [Render the Quarto report](#render-report)
 4. [Troubleshooting](#troubleshooting)
 5. [Example Report](#example)
-6. [Conclusion](#conclusion)
 
 <a name="prerequisites"></a>
 
