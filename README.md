@@ -92,13 +92,15 @@ If you encounter any issues during the rendering process or with the appearance 
 
 ### 5. NHS England Example Report
 
-An example report developed by the NHS England R community has been provided that uses the quarto-nhs-report-theme: [example_AE_report](/example_AE_report.qmd). The report shows how the NHS theme can be used to develop open-source analytical reports using R and Quarto and can be previewed at [https://nhsengland.github.io/nhs-r-reporting/examples/ae_attendance.html](https://nhsengland.github.io/nhs-r-reporting/examples/ae_attendance.html)
+An example report developed by the NHS England R community has been provided that uses the quarto-nhs-report-theme: [example_AE_report](/example_AE_report.qmd). 
+The report shows how the NHS theme can be used to develop open-source analytical reports using R and Quarto and can be previewed at [https://nhsengland.github.io/nhs-r-reporting/examples/ae_attendance.html](https://nhsengland.github.io/nhs-r-reporting/examples/ae_attendance.html)
 
 ## Contributing
 
-Please see our [guidance on how to contribute](./CONTRIBUTING.md).
+Please see our [guidance on how to contribute](https://tools.nhsrcommunity.com/contribution.html).
 
-This project is released with a Contributor [Code of Conduct](./CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
+This project is released with a Contributor [Code of Conduct](./CODE_OF_CONDUCT.md). 
+By contributing to this project, you agree to abide by its terms.
 
 ## Roadmap
 
